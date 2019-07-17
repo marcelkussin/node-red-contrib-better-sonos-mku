@@ -37,11 +37,11 @@ module.exports = function(RED) {
 		}
 
 		client.currentTrack().then(trackObj => {
-			if (err) {
-				node.error(JSON.stringify(err));
-				node.status({fill:"red", shape:"dot", text:"failed to retrieve current track"});
-				return;
-			}
+			// if (err) {
+			// 	node.error(JSON.stringify(err));
+			// 	node.status({fill:"red", shape:"dot", text:"failed to retrieve current track"});
+			// 	return;
+			// }
 			if (trackObj === null || trackObj === undefined) {
 				node.status({fill:"red", shape:"dot", text:"invalid current track retrieved"});
 				return;	
@@ -58,6 +58,10 @@ module.exports = function(RED) {
 			msg.track = trackObj;
 
 			getSonosVolume(node, msg, ipaddress);
+		}).catch(err => {
+			console.log(err);
+			node.error(JSON.stringify(err));
+			node.status({fill:"red", shape:"dot", text:"failed to retrieve current track"});
 		});
 	}
 	
@@ -71,11 +75,11 @@ module.exports = function(RED) {
 		}
 
 		client.getVolume().then(volume => {
-			if (err) {
-				node.error(JSON.stringify(err));
-				node.status({fill:"red", shape:"dot", text:"failed to retrieve volume"});
-				return;
-			}
+			// if (err) {
+			// 	node.error(JSON.stringify(err));
+			// 	node.status({fill:"red", shape:"dot", text:"failed to retrieve volume"});
+			// 	return;
+			// }
 			if (volume === null || volume === undefined) {
 				node.status({fill:"red", shape:"dot", text:"invalid volume retrieved"});
 				return;	
@@ -90,6 +94,10 @@ module.exports = function(RED) {
 			msg.normalized_volume = volume / 100.0;
 			
 			getSonosCurrentState(node, msg, ipaddress);
+		}).then(err => {
+			node.error(JSON.stringify(err));
+			node.status({fill:"red", shape:"dot", text:"failed to retrieve volume"});
+			return;
 		});
 	}
 
@@ -103,11 +111,11 @@ module.exports = function(RED) {
 		}
 
 		client.getCurrentState().then(state => {
-			if (err) {
-				node.error(JSON.stringify(err));
-				node.status({fill:"red", shape:"dot", text:"failed to retrieve current state"});
-				return;
-			}
+			// if (err) {
+			// 	node.error(JSON.stringify(err));
+			// 	node.status({fill:"red", shape:"dot", text:"failed to retrieve current state"});
+			// 	return;
+			// }
 			if (state === null || state === undefined) {
 				node.status({fill:"red", shape:"dot", text:"invalid current state retrieved"});
 				return;	
@@ -117,6 +125,10 @@ module.exports = function(RED) {
 			msg.state = state;
 
 			getSonosMuted(node, msg, ipaddress);
+		}).catch(err => {
+			node.error(JSON.stringify(err));
+			node.status({fill:"red", shape:"dot", text:"failed to retrieve current state"});
+			return;
 		});
 	}
 
@@ -130,11 +142,11 @@ module.exports = function(RED) {
 		}
 
 		client.getMuted().then(muted => {
-			if (err) {
-				node.error(JSON.stringify(err));
-				node.status({fill:"red", shape:"dot", text:"failed to retrieve Mute status"});
-				return;
-			}
+			// if (err) {
+			// 	node.error(JSON.stringify(err));
+			// 	node.status({fill:"red", shape:"dot", text:"failed to retrieve Mute status"});
+			// 	return;
+			// }
 			if (muted === null || muted === undefined) {
 				node.status({fill:"red", shape:"dot", text:"invalid Mute status retrieved"});
 				return;	
@@ -154,6 +166,10 @@ module.exports = function(RED) {
 
 			//Send output
 			node.send(msg);
+		}).catch(err => {
+			node.error(JSON.stringify(err));
+				node.status({fill:"red", shape:"dot", text:"failed to retrieve Mute status"});
+				return;
 		});
 	}
 	
