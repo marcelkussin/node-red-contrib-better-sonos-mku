@@ -60,6 +60,23 @@ module.exports = function(RED) {
 				helper.handleSonosApiRequest(node, err, result, msg, null, null);
 			});
 		} 
+		else if (node.position === "notification" || payload.position === "notification") {
+			node.log("Direct play Notification URI: " + _songuri);
+			client.playNotification({
+				uri: _songuri,
+				onlyWhenPlaying: false, // It will query the state anyway, don't play the notification if the speaker is currently off.
+				volume: 8 // Change the volume for the notification, and revert back afterwards.
+			  }).then(result => {
+				// It will wait until the notification is played until getting here.
+				helper.handleSonosApiRequest(node, null, result, null, null, null);
+
+			  }).catch(err => { 
+				helper.handleSonosApiRequest(node, err, null, null, null, null);
+			   })
+			// client.play(_songuri, function (err, result) {
+			// 	helper.handleSonosApiRequest(node, err, result, msg, null, null);
+			// });
+		} 
 		else {				
 			// Default is append to the end of current queue
 			var set_position = 0;
