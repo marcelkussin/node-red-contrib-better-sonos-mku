@@ -59,13 +59,15 @@ class SonosHelper
     {
         var foundMatch = false;
         var sonos = require("sonos");
-        var search = sonos.search(function(device) {
-            device.deviceDescription(function(err, info) {
-                if (err) {
-                    node.error(JSON.stringify(err));
-                    callback(err, null)
-                    return;
-                }
+        const search = sonos.DeviceDiscovery({ timeout: 30000 });
+
+        search.on('DeviceAvailable', function (device, model) {
+            device.deviceDescription().then(info => {
+                // if (err) {
+                //     node.error(JSON.stringify(err));
+                //     callback(err, null)
+                //     return;
+                // }
 
                 //Inject additional property
                 if (info.friendlyName !== undefined && info.friendlyName !== null)
@@ -89,19 +91,22 @@ class SonosHelper
                         search.destroy();
                     search = null;
                 }
+            }).catch(err => {
+                node.error(JSON.stringify(err));
+                callback(err, null)
             });
         });
-        search.setMaxListeners(Infinity);
+        // search.setMaxListeners(Infinity);
 
         //In case there is no match
-        setTimeout(function() { 
-            if (!foundMatch && callback)
-                callback(null, null);
-            if (search !== null && search !== undefined) {
-                search.destroy();
-                search = null;
-            }
-        }, 3000);
+        // setTimeout(function() { 
+        //     if (!foundMatch && callback)
+        //         callback(null, null);
+        //     if (search !== null && search !== undefined) {
+        //         // search.destroy();
+        //         // search = null;
+        //     }
+        // }, 3000);
     }
 
     handleSonosApiRequest(node, err, result, msg, successString, failureString)

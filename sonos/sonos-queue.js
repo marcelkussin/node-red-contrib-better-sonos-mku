@@ -50,13 +50,13 @@ module.exports = function(RED) {
 		
 		if (node.position === "next" || payload.position === "next") {
 			node.log("Queueing URI next: " + _songuri);
-			client.queueNext(_songuri, function (err, result) {
+			client.queueNext(_songuri).then(result => {
 				helper.handleSonosApiRequest(node, err, result, msg, null, null);
 			});
 		} 
 		else if (node.position === "directplay" || payload.position === "directplay") {
 			node.log("Direct play URI: " + _songuri);
-			client.play(_songuri, function (err, result) {
+			client.play(_songuri).then(result => {
 				helper.handleSonosApiRequest(node, err, result, msg, null, null);
 			});
 		} 
@@ -64,8 +64,8 @@ module.exports = function(RED) {
 			node.log("Direct play Notification URI: " + _songuri);
 			client.playNotification({
 				uri: _songuri,
-				onlyWhenPlaying: false, // It will query the state anyway, don't play the notification if the speaker is currently off.
-				volume: 8 // Change the volume for the notification, and revert back afterwards.
+				onlyWhenPlaying: true, // It will query the state anyway, don't play the notification if the speaker is currently off.
+				volume: 3 // Change the volume for the notification, and revert back afterwards.
 			  }).then(result => {
 				// It will wait until the notification is played until getting here.
 				helper.handleSonosApiRequest(node, null, result, null, null, null);
@@ -90,7 +90,7 @@ module.exports = function(RED) {
 			}
 			// Queue song now
 			node.log("Queuing at " + set_position + " URI: " + _songuri );
-			client.queue(_songuri, set_position, function (err, result) {
+			client.queue(_songuri, set_position).then(result => {
 				helper.handleSonosApiRequest(node, err, result, msg, null, null);
 			});
 		}

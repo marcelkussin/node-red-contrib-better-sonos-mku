@@ -36,7 +36,7 @@ module.exports = function(RED) {
 			return;
 		}
 
-		client.getQueue(function (err, queueObj) {
+		client.getQueue().then(queueObj => {
 			if (err) {
 				if (err === "{}") {
 					node.error(JSON.stringify(err));

@@ -9,22 +9,38 @@ module.exports = function(RED)
 
     //Build API to auto detect IP Addresses
     RED.httpAdmin.get("/sonosSearch", function(req, res) {
-        RED.log.debug("GET /sonosSearch");
+        RED.log.error("GET /sonosSearch");
         discoverSonos(function(devices) {
-            RED.log.debug("GET /sonosSearch: " + devices.length + " found");
+            RED.log.error("GET /sonosSearch: " + devices.length + " found");
             res.json(devices);
         });
     });
 
     function discoverSonos(discoveryCallback) 
     {
-        RED.log.debug("Start Sonos discovery");
+        RED.log.error("Start Sonos discovery");
 
         var sonos = require("sonos");
 
+        const search = sonos.DeviceDiscovery({ timeout: 30000 });
+
         var devices = [];
-        var search = sonos.search(function(device) {
-            device.deviceDescription(function(err, info) {
+        search.on('DeviceAvailable', function (device, model) {
+            device.deviceDescription().then(info => {
+                
+                console.log(info);
+                
+                var label = "" + info.friendlyName + " (" + info.roomName + ")";
+                devices.push({
+                    label:label,
+                    value:info.serialNum
+                });
+            }).catch(e => console.error(e));
+          })
+
+        /*
+        var search = sonos.search().then(device => {
+            device.deviceDescription().then(info => {
                 if (err) {
                     console.log(err);
                     return;
@@ -37,7 +53,7 @@ module.exports = function(RED)
             });
         });
         search.setMaxListeners(Infinity);
-
+        */
         //Stop searching after 5 seconds
         setTimeout(function() { 
             search.destroy();

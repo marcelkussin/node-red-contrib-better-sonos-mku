@@ -121,14 +121,14 @@ module.exports = function(RED) {
 		switch (cmd) 
 		{
 			case "pause":
-				client.pause(function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "paused", null);
-				});
+				client.pause().then(result => 
+					helper.handleSonosApiRequest(node, err, result, msg, "paused", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 				break;
 			case "stop":
-				client.stop(function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "stopped", null);
-				});
+				client.stop().then(result => 
+					helper.handleSonosApiRequest(node, err, result, msg, "stopped", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 				break;
 			case "toggle":
 			case "playpause":
@@ -146,50 +146,50 @@ module.exports = function(RED) {
 
 					//Toggle playing state
 					if (state === "playing") {
-						client.pause(function(err, result) {
-							helper.handleSonosApiRequest(node, err, result, msg, "paused", null);
-						});
+						client.pause().then(result => 
+							helper.handleSonosApiRequest(node, err, result, msg, "paused", null)
+						).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 					}
 					else {
-						client.play(function(err, result) {
-							helper.handleSonosApiRequest(node, err, result, msg, "playing", null);
-						});
+						client.play().then(result => 
+							helper.handleSonosApiRequest(node, err, result, msg, "playing", null)
+						).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 					}
 				});
 				break;
 			case "play":
 			case "playing":
-				client.play(function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "playing", null);
-				});
+				client.play().then(result => 
+					helper.handleSonosApiRequest(node, null, result, msg, "playing", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 				break;
 
 			case "next":
-				client.next(function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "next", null);
-				});
+				client.next().then(result => 
+					helper.handleSonosApiRequest(node, null, result, msg, "next", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 				break;
 			case "previous":
-				client.previous(function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "previous", null);
-				});
+				client.previous().then(result => 
+					helper.handleSonosApiRequest(node, null, result, msg, "previous", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 				break;
 
 			case "mute":
-				client.setMuted(true, function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "muted", null);
+				client.setMuted(true).then(result => {
+					helper.handleSonosApiRequest(node, err, result, msg, "muted", null)
 				});
 				break;
 			case "unmute":
 				client.setMuted(false, function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "unmuted", null);
+					helper.handleSonosApiRequest(node, err, result, msg, "unmuted", null)
 				});
 				break;
 
 			case "flush":
-				client.flush(function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "queue cleared", null);
-				});
+				client.flush().then(result => 
+					helper.handleSonosApiRequest(node, err, result, msg, "queue cleared", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 				break;
 		}
 	}
@@ -249,9 +249,9 @@ module.exports = function(RED) {
 					node.status({fill:"red", shape:"dot", text:"invalid value for volume"});
 					break;
 				}
-				client.setVolume(String(_volumeValue), function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(_volumeValue), null);
-				});
+				client.setVolume(String(_volumeValue)).then(result => 
+					helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(_volumeValue), null)
+				);
 				break;
 
 			
@@ -268,9 +268,9 @@ module.exports = function(RED) {
 						var volume_val = parseInt(result) + volume_step;
 						volume_val = Math.min(100, volume_val);
 						volume_val = Math.max(0, volume_val);
-						client.setVolume(volume_val, function (err, result) {
-							helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(volume_val), null);
-						});
+						client.setVolume(volume_val).then(result => 
+							helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(volume_val), null)
+						);
 				});
 				break;
 
@@ -287,9 +287,9 @@ module.exports = function(RED) {
 						var volume_val = parseInt(result) - volume_step;
 						volume_val = Math.min(100, volume_val);
 						volume_val = Math.max(0, volume_val);
-						client.setVolume(volume_val, function (err, result) {
-							helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(volume_val), null);
-						});
+						client.setVolume(volume_val).then(result => 
+							helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(volume_val), null)
+						);
 				});
 				break;
 		}
@@ -298,9 +298,9 @@ module.exports = function(RED) {
 	function handleGroupingCommand(node, configNode, msg, client, payload)
 	{
 		if (payload === "leave_group") {
-			client.leaveGroup(function(err, result) {
-				helper.handleSonosApiRequest(node, err, result, msg, "left group", null);
-			});
+			client.leaveGroup().then(result => 
+				helper.handleSonosApiRequest(node, err, result, msg, "left group", null)
+			).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
 		}
 
 		if (payload === "join_group") {
@@ -312,9 +312,9 @@ module.exports = function(RED) {
 				return;
 			}
 
-			client.joinGroup(deviceName, function(err, result) {
-				helper.handleSonosApiRequest(node, err, result, msg, "joined group with " + deviceName, null);
-			});
+			client.joinGroup(deviceName).then(result => 
+				helper.handleSonosApiRequest(node, err, result, msg, "joined group with " + deviceName, null)
+			);
 		}
 	}
 	

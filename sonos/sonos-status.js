@@ -36,7 +36,7 @@ module.exports = function(RED) {
 			return;
 		}
 
-		client.currentTrack(function (err, trackObj) {
+		client.currentTrack().then(trackObj => {
 			if (err) {
 				node.error(JSON.stringify(err));
 				node.status({fill:"red", shape:"dot", text:"failed to retrieve current track"});
@@ -70,7 +70,7 @@ module.exports = function(RED) {
 			return;
 		}
 
-		client.getVolume(function(err, volume) {
+		client.getVolume().then(volume => {
 			if (err) {
 				node.error(JSON.stringify(err));
 				node.status({fill:"red", shape:"dot", text:"failed to retrieve volume"});
@@ -102,7 +102,7 @@ module.exports = function(RED) {
 			return;
 		}
 
-		client.getCurrentState(function (err, state) {
+		client.getCurrentState().then(state => {
 			if (err) {
 				node.error(JSON.stringify(err));
 				node.status({fill:"red", shape:"dot", text:"failed to retrieve current state"});
@@ -129,7 +129,7 @@ module.exports = function(RED) {
 			return;
 		}
 
-		client.getMuted(function (err, muted) {
+		client.getMuted().then(muted => {
 			if (err) {
 				node.error(JSON.stringify(err));
 				node.status({fill:"red", shape:"dot", text:"failed to retrieve Mute status"});
