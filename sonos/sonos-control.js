@@ -122,13 +122,13 @@ module.exports = function(RED) {
 		{
 			case "pause":
 				client.pause().then(result => 
-					helper.handleSonosApiRequest(node, err, result, msg, "paused", null)
-				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+					helper.handleSonosApiRequest(node, null, result, msg, "paused", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 				break;
 			case "stop":
 				client.stop().then(result => 
-					helper.handleSonosApiRequest(node, err, result, msg, "stopped", null)
-				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+					helper.handleSonosApiRequest(node, null, result, msg, "stopped", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 				break;
 			case "toggle":
 			case "playpause":
@@ -147,13 +147,13 @@ module.exports = function(RED) {
 					//Toggle playing state
 					if (state === "playing") {
 						client.pause().then(result => 
-							helper.handleSonosApiRequest(node, err, result, msg, "paused", null)
-						).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+							helper.handleSonosApiRequest(node, null, result, msg, "paused", null)
+						).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 					}
 					else {
 						client.play().then(result => 
-							helper.handleSonosApiRequest(node, err, result, msg, "playing", null)
-						).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+							helper.handleSonosApiRequest(node, null, result, msg, "playing", null)
+						).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 					}
 				});
 				break;
@@ -161,35 +161,35 @@ module.exports = function(RED) {
 			case "playing":
 				client.play().then(result => 
 					helper.handleSonosApiRequest(node, null, result, msg, "playing", null)
-				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+				).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 				break;
 
 			case "next":
 				client.next().then(result => 
 					helper.handleSonosApiRequest(node, null, result, msg, "next", null)
-				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+				).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 				break;
 			case "previous":
 				client.previous().then(result => 
 					helper.handleSonosApiRequest(node, null, result, msg, "previous", null)
-				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+				).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 				break;
 
 			case "mute":
 				client.setMuted(true).then(result => {
-					helper.handleSonosApiRequest(node, err, result, msg, "muted", null)
-				});
+					helper.handleSonosApiRequest(node, null, result, msg, "muted", null);
+				}).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 				break;
 			case "unmute":
-				client.setMuted(false, function(err, result) {
-					helper.handleSonosApiRequest(node, err, result, msg, "unmuted", null)
-				});
+				client.setMuted(false).then(result => {
+					helper.handleSonosApiRequest(node, null, result, msg, "unmuted", null);
+				}).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 				break;
 
 			case "flush":
 				client.flush().then(result => 
-					helper.handleSonosApiRequest(node, err, result, msg, "queue cleared", null)
-				).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+					helper.handleSonosApiRequest(node, null, result, msg, "queue cleared", null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, {}, null, null));
 				break;
 		}
 	}
@@ -250,8 +250,8 @@ module.exports = function(RED) {
 					break;
 				}
 				client.setVolume(String(_volumeValue)).then(result => 
-					helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(_volumeValue), null)
-				);
+					helper.handleSonosApiRequest(node, null, result, msg, "vol: " + String(_volumeValue), null)
+				).catch(e => helper.handleSonosApiRequest(node, e, null, msg, "error vol: " + String(_volumeValue), null));
 				break;
 
 			
@@ -259,19 +259,19 @@ module.exports = function(RED) {
 				var volume_step = parseInt(_volumeValue);
 				if (isNaN(volume_step) || volume_step > 100 || volume_step <= 0)
 					volume_step = 5;
-				client.getVolume(function (err, result) {
-					if (err) {
-						node.error(JSON.stringify(err));
-						node.status({fill:"red", shape:"dot", text:"failed to execute request"});
-						return;
-					}
+				client.getVolume().then(result => {
+					// if (err) {
+					// 	node.error(JSON.stringify(err));
+					// 	node.status({fill:"red", shape:"dot", text:"failed to execute request"});
+					// 	return;
+					// }
 						var volume_val = parseInt(result) + volume_step;
 						volume_val = Math.min(100, volume_val);
 						volume_val = Math.max(0, volume_val);
 						client.setVolume(volume_val).then(result => 
-							helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(volume_val), null)
+							helper.handleSonosApiRequest(node, null, result, msg, "vol: " + String(volume_val), null)
 						);
-				});
+				}).catch(e => helper.handleSonosApiRequest(node, e, null, msg, "error vol: " + String(volume_val), null));
 				break;
 
 			case "vol_down":
@@ -288,8 +288,8 @@ module.exports = function(RED) {
 						volume_val = Math.min(100, volume_val);
 						volume_val = Math.max(0, volume_val);
 						client.setVolume(volume_val).then(result => 
-							helper.handleSonosApiRequest(node, err, result, msg, "vol: " + String(volume_val), null)
-						);
+							helper.handleSonosApiRequest(node, null, result, msg, "vol: " + String(volume_val), null)
+						).catch(e => helper.handleSonosApiRequest(node, e, null, msg, "error vol: " + String(volume_val), null));
 				});
 				break;
 		}
@@ -299,8 +299,8 @@ module.exports = function(RED) {
 	{
 		if (payload === "leave_group") {
 			client.leaveGroup().then(result => 
-				helper.handleSonosApiRequest(node, err, result, msg, "left group", null)
-			).catch(e => helper.handleSonosApiRequest(node, e, null, null, null, null));
+				helper.handleSonosApiRequest(node, null, result, msg, "left group", null)
+			).catch(e => helper.handleSonosApiRequest(node, e, null, msg, null, null));
 		}
 
 		if (payload === "join_group") {
@@ -313,8 +313,10 @@ module.exports = function(RED) {
 			}
 
 			client.joinGroup(deviceName).then(result => 
-				helper.handleSonosApiRequest(node, err, result, msg, "joined group with " + deviceName, null)
-			);
+				helper.handleSonosApiRequest(node, null, result, msg, "joined group with " + deviceName, null)
+			).then(err => {
+				helper.handleSonosApiRequest(node, err, null, msg, "error joined group with " + deviceName, null)
+			});
 		}
 	}
 	

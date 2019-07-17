@@ -50,8 +50,9 @@ class SonosHelper
 
             console.log("Found Sonos device " + configNode.serialnum + " at " + device.ipaddress);
 
-            if (callback)
+            if (callback){
                 callback(device);
+            }
         });
     }
 
@@ -62,13 +63,11 @@ class SonosHelper
         const search = sonos.DeviceDiscovery({ timeout: 30000 });
 
         search.on('DeviceAvailable', function (device, model) {
+            // console.log('DeviceAvailable', device, model);
             device.deviceDescription().then(info => {
-                // if (err) {
-                //     node.error(JSON.stringify(err));
-                //     callback(err, null)
-                //     return;
-                // }
-
+                if(foundMatch) {
+                    return;
+                }
                 //Inject additional property
                 if (info.friendlyName !== undefined && info.friendlyName !== null)
                     info.ipaddress = info.friendlyName.split("-")[0].trim();
@@ -83,13 +82,12 @@ class SonosHelper
                     if (device.serialNumber.trim().toUpperCase() == serialNumber.trim().toUpperCase())
                         foundMatch = true;
 
-                if (foundMatch && callback)
+                if (foundMatch && callback) {
                     callback(null, info);
+                }
 
                 if (foundMatch) {
-                    if (search !== null && search !== undefined)
-                        search.destroy();
-                    search = null;
+                    return;
                 }
             }).catch(err => {
                 node.error(JSON.stringify(err));

@@ -28,8 +28,6 @@ module.exports = function(RED)
         search.on('DeviceAvailable', function (device, model) {
             device.deviceDescription().then(info => {
                 
-                console.log(info);
-                
                 var label = "" + info.friendlyName + " (" + info.roomName + ")";
                 devices.push({
                     label:label,

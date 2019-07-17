@@ -35,11 +35,14 @@ module.exports = function(RED) {
 
 	function setSonosQueue(node, msg, ipaddress)
 	{
-		var sonos = require('sonos');
-		var client = new sonos.Sonos(ipaddress);
+		if(!msg) msg = {};
+		const Sonos = require('sonos').Sonos
+		var client = new Sonos(ipaddress);
 		if (client === null || client === undefined) {
 			node.status({fill:"red", shape:"dot", text:"sonos client is null"});
 			return;
+		} else {
+			console.log('sonos client is', client);
 		}
 
 		var payload = typeof msg.payload === 'object' ? msg.payload : {};
@@ -65,17 +68,25 @@ module.exports = function(RED) {
 			client.playNotification({
 				uri: _songuri,
 				onlyWhenPlaying: true, // It will query the state anyway, don't play the notification if the speaker is currently off.
-				volume: 3 // Change the volume for the notification, and revert back afterwards.
+				volume: 80 // Change the volume for the notification, and revert back afterwards.
 			  }).then(result => {
 				// It will wait until the notification is played until getting here.
-				helper.handleSonosApiRequest(node, null, result, null, null, null);
+				helper.handleSonosApiRequest(node, null, {playedNotification: true}, {}, null, null);
 
 			  }).catch(err => { 
-				helper.handleSonosApiRequest(node, err, null, null, null, null);
+				helper.handleSonosApiRequest(node, err, {playedNotification: false}, {}, null, null);
 			   })
-			// client.play(_songuri, function (err, result) {
-			// 	helper.handleSonosApiRequest(node, err, result, msg, null, null);
-			// });
+			// client.playNotification({
+			// 	uri: 'https://www.zapsplat.com/wp-content/uploads/2015/sound-effects-the-sound-pack-tree/tspt_angry_dog_02_003.mp3?_=1',
+			// 	onlyWhenPlaying: false, // It will query the state anyway, don't play the notification if the speaker is currently off.
+			// 	volume: 20 // Change the volume for the notification, and revert back afterwards.
+			//   }).then(result => {
+			// 	// It will wait until the notification is played until getting here.
+			// 	console.log('Did play notification %j', result)
+			  
+			// 	// It starts (and stops) a listener in the background so you have to exit the process explicitly.
+			// 	process.exit()
+			//   }).catch(err => { console.log('Error occurred %j', err) })
 		} 
 		else {				
 			// Default is append to the end of current queue
