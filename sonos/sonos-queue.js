@@ -17,7 +17,10 @@ module.exports = function(RED) {
 		//clear node status
 		node.status({});
 
+		// console.log(n);
+
 		//Hmmm?		
+		node.notificationvolume = n.notificationvolume;
 		node.songuri = n.songuri;
 		node.position = n.position;
 		if (node.position === "empty") {
@@ -42,7 +45,7 @@ module.exports = function(RED) {
 			node.status({fill:"red", shape:"dot", text:"sonos client is null"});
 			return;
 		} else {
-			console.log('sonos client is', client);
+			// console.log('sonos client is', client);
 		}
 
 		var payload = typeof msg.payload === 'object' ? msg.payload : {};
@@ -64,11 +67,17 @@ module.exports = function(RED) {
 			});
 		} 
 		else if (node.position === "notification" || payload.position === "notification") {
+			let notificationvolume = 50;
+			if(node.notificationvolume) notificationvolume = parseInt(node.notificationvolume);
+			if(payload.notificationvolume) notificationvolume = parseInt(payload.notificationvolume);
+			let onlyWhenPlaying = false;
+			if(payload.onlyWhenPlaying) onlyWhenPlaying = payload.onlyWhenPlaying === true;
+
 			node.log("Direct play Notification URI: " + _songuri);
 			client.playNotification({
 				uri: _songuri,
-				onlyWhenPlaying: true, // It will query the state anyway, don't play the notification if the speaker is currently off.
-				volume: 80 // Change the volume for the notification, and revert back afterwards.
+				onlyWhenPlaying: onlyWhenPlaying, // It will query the state anyway, don't play the notification if the speaker is currently off.
+				volume: notificationvolume // Change the volume for the notification, and revert back afterwards.
 			  }).then(result => {
 				// It will wait until the notification is played until getting here.
 				helper.handleSonosApiRequest(node, null, {playedNotification: true}, {}, null, null);
@@ -76,17 +85,6 @@ module.exports = function(RED) {
 			  }).catch(err => { 
 				helper.handleSonosApiRequest(node, err, {playedNotification: false}, {}, null, null);
 			   })
-			// client.playNotification({
-			// 	uri: 'https://www.zapsplat.com/wp-content/uploads/2015/sound-effects-the-sound-pack-tree/tspt_angry_dog_02_003.mp3?_=1',
-			// 	onlyWhenPlaying: false, // It will query the state anyway, don't play the notification if the speaker is currently off.
-			// 	volume: 20 // Change the volume for the notification, and revert back afterwards.
-			//   }).then(result => {
-			// 	// It will wait until the notification is played until getting here.
-			// 	console.log('Did play notification %j', result)
-			  
-			// 	// It starts (and stops) a listener in the background so you have to exit the process explicitly.
-			// 	process.exit()
-			//   }).catch(err => { console.log('Error occurred %j', err) })
 		} 
 		else {				
 			// Default is append to the end of current queue
