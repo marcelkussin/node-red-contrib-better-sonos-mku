@@ -90,6 +90,7 @@ class SonosHelper
                     return;
                 }
             }).catch(err => {
+                // console.log('error', err);
                 node.error(JSON.stringify(err));
                 callback(err, null)
             });
